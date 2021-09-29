@@ -4,6 +4,7 @@ class Card():
         self.number=number
         self.pin=pin
         self.amount=amount
+
     def __str__(self):
         return (f'card number: {self.number}\n\
 pin number : {self.pin}\n\
@@ -13,6 +14,7 @@ class ATM():
     def __init__(self,card_list={},master_passcode=000):
         self.card_list=card_list
         self.master_passcode=master_passcode
+        self.current_user_index=-1
 
     def unlock(self, number):
         print("master pass",self.master_passcode)
@@ -29,6 +31,7 @@ class ATM():
     def verify(self,card_number,pin_number):
         for card in self.card_list:
             if card_number==card.number and pin_number==card.pin:
+                self.current_user_index=self.card_list.index(card)
                 return True
         return False
 
@@ -48,15 +51,40 @@ def master_unlock(atm):
         passcode_pass=atm.unlock(passcode)
     exit()
 
-    pass
+def deposit(atm):
+    amount=int(input("Please insert(type) money: "))
+    atm.card_list[atm.current_user_index].amount+=amount
+    print("your current balance is: ",atm.card_list[atm.current_user_index].amount)
+
+def withdraw(atm):
+    amount=int(input("Please choose(type) the amount to withdraw: "))
+    print("Preference:")
+    print("1. Mostly 100s\n2. Mostly 50s\n3. Mostly 20s\n4. 100s and 50s")
+    selection=int(input("Please select: "))
+    currency=[100,50,20,10,5,1]
+
+def greedy(amount,currency,type):
+    index=currency.index(type)
+    remaining=amount
+    return_dict={}
+    quantity=0
+    for i in range(index,len(currency)):
+        if remaining>0:
+            quantity=amount//currency[index]
+            remaining=amount%currency[index]
+            return_dict[currency[index]]=quantity
+        if remaining==0:
+            break
+    return return_dict
+
+
 if __name__=="__main__":
     u1=Card(123,4312,100)
     u2=Card(456,2314,1000)
     atm=ATM({},453)
     print("master",atm.master_passcode)
-    atm.card_list={u1,u2}
+    atm.card_list=[u1,u2]
 
-    #driver code
     count=0
     print('WELCOME TO ATM')
     while(count<3):
@@ -86,5 +114,12 @@ if __name__=="__main__":
     if count==3:
         print('your card is locked, please contact customer service at xxx-xxx-xxxx')
         master_unlock(atm)
+    print("your current balance is: ",atm.card_list[atm.current_user_index].amount)
     print("Please choose: ")
-    selection=int(input("1."))
+    selection=int(input("1. Deposit\n2. Withdraw\n3. Cancel(eject card)\n"))
+    if selection==3:
+        exit()
+    elif selection==1:
+        deposit(atm)
+    elif selection==2:
+        withdraw()
